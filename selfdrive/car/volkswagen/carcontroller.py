@@ -45,7 +45,11 @@ class CarController(CarControllerBase):
       # of HCA disabled; this is done whenever output happens to be zero.
 
       if CC.latActive:
-        new_steer = int(round(actuators.steer * self.CCP.STEER_MAX))
+        # Medium 'on rails' feel for PQ (Passat NMS): ~8% stronger steering request
+        raw_steer = actuators.steer * 1.08
+        raw_steer = clip(raw_steer, -1.0, 1.0)
+        new_steer = int(round(raw_steer * self.CCP.STEER_MAX))
+
         apply_steer = apply_driver_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, self.CCP)
         self.hca_frame_timer_running += self.CCP.STEER_STEP
         if self.apply_steer_last == apply_steer:
